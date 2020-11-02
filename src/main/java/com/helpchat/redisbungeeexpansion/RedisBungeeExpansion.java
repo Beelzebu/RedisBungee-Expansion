@@ -2,26 +2,22 @@ package com.helpchat.redisbungeeexpansion;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import me.clip.placeholderapi.PlaceholderAPI;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import me.clip.placeholderapi.expansion.Cacheable;
 import me.clip.placeholderapi.expansion.Configurable;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.clip.placeholderapi.expansion.Taskable;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public final class RedisBungeeExpansion extends PlaceholderExpansion implements PluginMessageListener, Taskable, Cacheable, Configurable {
 
@@ -35,14 +31,14 @@ public final class RedisBungeeExpansion extends PlaceholderExpansion implements 
 
     private int fetchInterval = 60;
 
-    private boolean registered = false;
+    private boolean registered;
 
     public RedisBungeeExpansion() {
-        if (!registered) {
-            Bukkit.getMessenger().registerOutgoingPluginChannel(getPlaceholderAPI(), CHANNEL);
-            Bukkit.getMessenger().registerIncomingPluginChannel(getPlaceholderAPI(), CHANNEL, this);
-            registered = true;
-        }
+        Bukkit.getMessenger().unregisterIncomingPluginChannel(getPlaceholderAPI(), CHANNEL);
+        Bukkit.getMessenger().unregisterOutgoingPluginChannel(getPlaceholderAPI(), CHANNEL);
+        Bukkit.getMessenger().registerOutgoingPluginChannel(getPlaceholderAPI(), CHANNEL);
+        Bukkit.getMessenger().registerIncomingPluginChannel(getPlaceholderAPI(), CHANNEL, this);
+        registered = true;
     }
 
     @Override
@@ -56,7 +52,7 @@ public final class RedisBungeeExpansion extends PlaceholderExpansion implements 
             }
         }
 
-        return PlaceholderAPI.registerPlaceholderHook("redisbungee", this);
+        return super.register();
     }
 
     @Override
@@ -76,7 +72,7 @@ public final class RedisBungeeExpansion extends PlaceholderExpansion implements 
 
     @Override
     public String getVersion() {
-        return "1.0.1";
+        return "1.0.2";
     }
 
     @Override
@@ -153,7 +149,7 @@ public final class RedisBungeeExpansion extends PlaceholderExpansion implements 
 
                 getPlayers("ALL");
             }
-        }.runTaskTimer(getPlaceholderAPI(), 100L, 20L*fetchInterval);
+        }.runTaskTimer(getPlaceholderAPI(), 100L, 20L * fetchInterval);
     }
 
     @Override
